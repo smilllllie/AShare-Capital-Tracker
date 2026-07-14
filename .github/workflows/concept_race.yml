@@ -23,7 +23,6 @@ jobs:
           
       - name: 安装依赖
         run: |
-          pip install -r requirements.txt
           pip install akshare playwright requests pandas
           python -m playwright install --with-deps chromium
           
