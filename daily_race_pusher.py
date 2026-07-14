@@ -9,7 +9,7 @@ import requests
 PUSHPLUS_TOKEN = os.environ.get('PUSHPLUS_TOKEN', '') 
 
 async def capture_final_board():
-    html_path = f"file:///{os.path.abspath('concept_race_board.html').replace(chr(92), '/')}"
+    html_path = f"file:///{os.path.abspath('index.html').replace(chr(92), '/')}"
     screenshot_path = 'latest_board.png'
     
     print("启动浏览器内核，渲染概念赛跑最终榜单...")
@@ -80,7 +80,7 @@ def push_to_wechat(screenshot_path):
         {summary_text}
         {img_html}
         <br>
-        <p style="font-size: 12px; color: #888; text-align: center;">💡 观看全天动态赛跑回放，<br>请在本地打开 concept_race_board.html</p>
+        <p style="font-size: 12px; color: #888; text-align: center;">💡 观看全天动态赛跑回放，<br>请在本地打开 index.html</p>
     </div>
     """
 
