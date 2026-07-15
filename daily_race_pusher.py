@@ -6,10 +6,12 @@ import asyncio
 from playwright.async_api import async_playwright
 import requests
 
+import pathlib
+
 PUSHPLUS_TOKEN = os.environ.get('PUSHPLUS_TOKEN', '') 
 
 async def capture_final_board():
-    html_path = f"file:///{os.path.abspath('index.html').replace(chr(92), '/')}"
+    html_path = pathlib.Path('index.html').absolute().as_uri()
     screenshot_path = 'latest_board.png'
     
     print("启动浏览器内核，渲染概念赛跑最终榜单...")
@@ -39,6 +41,20 @@ async def capture_final_board():
         await browser.close()
         print(f"成功保存最终榜单截图: {screenshot_path}")
         return screenshot_path
+
+def upload_image_to_telegraph(image_path):
+    print("正在上传截图到图床(telegra.ph)...")
+    try:
+        with open(image_path, 'rb') as f:
+            files = {'file': ('image.jpeg', f, 'image/jpeg')}
+            res = requests.post('https://telegra.ph/upload', files=files, timeout=15)
+            if res.status_code == 200:
+                url = 'https://telegra.ph' + res.json()[0]['src']
+                print(f"✅ 图床上传成功: {url}")
+                return url
+    except Exception as e:
+        print("❌ 图床上传失败:", e)
+    return None
 
 def push_to_wechat(screenshot_path):
     if not PUSHPLUS_TOKEN:
@@ -71,9 +87,13 @@ def push_to_wechat(screenshot_path):
 
     img_html = ""
     if os.path.exists(screenshot_path):
-        with open(screenshot_path, "rb") as f:
-            b64_str = base64.b64encode(f.read()).decode()
-            img_html = f'<div style="text-align:center; margin-top:20px;"><img src="data:image/jpeg;base64,{b64_str}" style="max-width:100%; border-radius:10px;"></div>'
+        img_url = upload_image_to_telegraph(screenshot_path)
+        if img_url:
+            img_html = f'<div style="text-align:center; margin-top:20px;"><img src="{img_url}" style="max-width:100%; border-radius:10px;"></div>'
+        else:
+            with open(screenshot_path, "rb") as f:
+                b64_str = base64.b64encode(f.read()).decode()
+                img_html = f'<div style="text-align:center; margin-top:20px;"><img src="data:image/jpeg;base64,{b64_str}" style="max-width:100%; border-radius:10px;"></div>'
 
     html_content = f"""
     <div style="font-family: sans-serif; background-color: #f7f9f9; padding: 15px; border-radius: 8px;">
