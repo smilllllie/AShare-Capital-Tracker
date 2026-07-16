@@ -1,0 +1,16 @@
+# 忽略 Python 缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 忽略临时数据文件和本地生成的截图
+*.jpg
+*.png
+*.log
+
+# 忽略不相关的大型下载文件夹和脚本
+zhengxi-views-main/
+superpowers-zh-main/
+snake_game/
+自动开启电脑睡眠唤醒.bat
+set_wake.ps1
