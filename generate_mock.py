@@ -5,8 +5,8 @@ import random
 names = [
     "PCB概念", "创新药", "共封装光学(CPO)", "商业航天", 
     "存储芯片", "人形机器人", "光纤概念", "先进封装", 
-    "算力租赁", "消费电子", "车路云", "低空经济", 
-    "AI大模型", "半导体设备", "黄金概念", "CRO概念", 
+    "算力租赁", "消费电子", "白酒", "低空经济", 
+    "人工智能", "半导体设备", "黄金概念", "CRO概念", 
     "液冷服务器", "AI应用"
 ]
 
@@ -40,12 +40,12 @@ for h in range(9, 16):
                 "value": round(vals[n], 2)
             })
             
-        # 按照资金净额排序，取前 12 名
+        # 按照资金净额排序
         frame_data.sort(key=lambda x: x['value'], reverse=True)
         
         history.append({
             "time": time_str,
-            "data": frame_data[:12]
+            "data": frame_data
         })
 
 with open('concept_history.js', 'w', encoding='utf-8') as f:

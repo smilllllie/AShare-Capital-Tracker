@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霓虹合成波贪吃蛇 | Neon Synth-Wave Snake</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入炫酷的字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 赛博朋克扫描线特效 -->
+    <div class="scanlines"></div>
+    
+    <div class="game-container">
+        <div class="header">
+            <div class="top-row">
+                <h1>NEON SNAKE</h1>
+                <!-- 音频开关 -->
+                <button id="mute-btn" class="icon-btn" title="切换音效">
+                    <span class="icon">🔊</span>
+                </button>
+            </div>
+            
+            <div class="score-board">
+                <div class="score-card">
+                    <span class="label">SCORE</span>
+                    <span id="score" class="value">0000</span>
+                </div>
+                <div class="score-card">
+                    <span class="label">MULTIPLIER</span>
+                    <span id="multiplier" class="value text-pink">x1</span>
+                </div>
+                <div class="score-card">
+                    <span class="label">HIGH SCORE</span>
+                    <span id="high-score" class="value">0000</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 道具状态栏 -->
+        <div id="powerup-bar" class="powerup-bar hidden">
+            <span id="powerup-label">SLOW MOTION</span>
+            <div class="progress-track">
+                <div id="powerup-progress" class="progress-fill"></div>
+            </div>
+        </div>
+        
+        <div class="canvas-container" id="game-viewport">
+            <canvas id="gameCanvas" width="440" height="440"></canvas>
+            
+            <!-- 开始界面 -->
+            <div id="start-screen" class="overlay">
+                <div class="glitch-wrapper">
+                    <h2 class="glitch" data-text="READY?">READY?</h2>
+                </div>
+                <p class="subtitle">NEON SYNTH-WAVE EDITION</p>
+                <button id="start-btn">START SIMULATION</button>
+            </div>
+            
+            <!-- 游戏结束界面 -->
+            <div id="game-over" class="hidden overlay">
+                <h2 class="text-pink">SYSTEM FAILURE</h2>
+                <p class="final-stats">FINAL SCORE: <span id="final-score">0</span></p>
+                <button id="restart-btn">REBOOT SYSTEM</button>
+            </div>
+        </div>
+        
+        <div class="controls-hint">
+            <p>使用 <span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> 或 <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> 控制移动</p>
+            <p class="powerups-guide">🔴 普通 | 🔵 减速 | 🟡 双倍 | 🟣 护盾</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+name: Morning Push (08:30)
+
+on:
+  workflow_dispatch: # 允许手动点击触发测试或外部 API 触发
+
+jobs:
+  run-pusher:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run Morning Push
+      env:
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+        PYTHONIOENCODING: utf-8
+      run: python daily_news_pusher.py --mode morning

@@ -19,11 +19,14 @@
         }
         .container {
             width: 100%;
-            max-width: 900px; 
-            background: rgba(15, 15, 20, 0.95);
-            border-radius: 16px;
+            max-width: 950px; 
+            background: rgba(20, 20, 28, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(69, 243, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             position: relative;
         }
         .header {
@@ -51,6 +54,7 @@
         #chart-area {
             width: 100%;
             height: 650px;
+            position: relative;
         }
         
         .controls {
@@ -113,10 +117,25 @@
     </style>
 </head>
 <body>
+    <!-- 背景音乐：隐藏的音频控件 -->
+    <audio id="bgMusic" loop>
+        <!-- 出于浏览器安全和版权限制，无法直接外链最新的热门流行歌。我已经配置好了本地读取：请下载一首你喜欢的近期热门歌曲（比如《黑神话悟空》BGM或抖音热歌），重命名为 music.mp3 并放在当前文件夹下，即可生效！ -->
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
     <div class="container">
-        <div class="header">
-            <h1>盘中核心概念资金流向排行榜</h1>
-            <div class="time-display" id="timeDisplay">09:30</div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <div id="dateDisplay" style="font-size: 18px; font-weight: bold; color: #888; margin-bottom: 5px;"></div>
+                <div class="time-display" id="timeDisplay" style="margin:0;">09:30</div>
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <h1 style="font-size: 26px; margin: 0; padding-bottom: 10px; color: #4facfe; text-shadow: 0 0 15px rgba(69, 243, 255, 0.6); border:none;">热点资金榜</h1>
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <div style="font-size: 14px; color: #888;">上证指数 <span id="shIndexChange" style="font-weight:bold;">--</span></div>
+                <div id="shIndexValue" style="font-size: 24px; font-weight: bold; margin: 2px 0; color: #fff;">----.--</div>
+                <div style="font-size: 14px; color: #888;">实时总净额 <span id="totalInflow" style="font-weight:bold;">--</span></div>
+            </div>
         </div>
         
         <div id="chart-area"></div>
@@ -137,14 +156,6 @@
         const chartDom = document.getElementById('chart-area');
         const myChart = echarts.init(chartDom, 'dark');
         
-        const colorPalette = [
-            '#ff3333', '#00ff88', '#4facfe', '#f093fb', 
-            '#f5576c', '#43e97b', '#fa709a', '#fee140', 
-            '#00f2fe', '#a18cd1', '#ff0844', '#b3ffab',
-            '#ffb199', '#fbc2eb', '#4facfe', '#43e97b', '#f5576c', '#fee140'
-        ];
-        
-        // 我们需要提前把所有在 JSON 里出现过的名字收集起来作为 Y 轴的固定刻度，保证动画正常
         const fixedNames = new Set();
         if (window.HISTORY_DATA) {
             window.HISTORY_DATA.forEach(frame => {
@@ -152,23 +163,21 @@
             });
         }
         const nameList = Array.from(fixedNames);
-        
-        const colorMap = {};
-        nameList.forEach((name, i) => colorMap[name] = colorPalette[i % colorPalette.length]);
 
         let currentIntervalSpeed = 500; 
 
         const option = {
             backgroundColor: 'transparent',
             grid: {
-                top: 20,
+                top: 40,
                 bottom: 20,
-                left: window.innerWidth < 600 ? 90 : 120, // 移动端自适应左侧宽度
-                right: 70
+                left: 30,
+                right: 30,
+                containLabel: true
             },
             xAxis: {
-                max: 'dataMax',
-                min: 'dataMin', 
+                max: function(value) { return value.max + (Math.max(value.max - value.min, 10)) * 0.25; },
+                min: function(value) { return value.min < 0 ? value.min - (Math.max(value.max - value.min, 10)) * 0.25 : 0; }, 
                 axisLabel: {
                     formatter: n => n.toFixed(1) + ' 亿',
                     color: '#888',
@@ -176,58 +185,52 @@
                 },
                 splitLine: {
                     show: true,
-                    lineStyle: { color: 'rgba(255,255,255,0.05)' }
+                    lineStyle: { color: 'rgba(255,255,255,0.06)' }
                 }
             },
             yAxis: {
                 type: 'category',
                 inverse: true, 
-                max: 11, // 前12名展示 (0-11)
                 data: nameList,
                 axisLabel: {
-                    show: true,
-                    fontSize: window.innerWidth < 600 ? 12 : 14,
-                    fontWeight: 'bold',
-                    color: '#fff'
+                    show: false
                 },
+                axisLine: {
+                    show: true,
+                    onZero: true,
+                    lineStyle: { color: 'rgba(255,255,255,0.4)', width: 2 }
+                },
+                axisTick: { show: false },
                 animationDuration: 300,
                 animationDurationUpdate: 300
             },
-            series: [{
-                realtimeSort: true,
-                name: '净额(亿元)',
-                type: 'bar',
-                data: [],
-                label: {
-                    show: true,
-                    position: 'right',
-                    valueAnimation: true,
-                    formatter: function (params) {
-                        const val = params.value;
-                        return (val > 0 ? '+' : '') + val.toFixed(2) + ' 亿';
+            series: [
+                {
+                    name: '净额(亿元)',
+                    type: 'bar',
+                    z: 2,
+                    barWidth: window.innerWidth < 600 ? 10 : 14,
+                    data: [],
+                    label: {
+                        show: true,
+                        valueAnimation: true,
+                        formatter: function (params) {
+                            const val = params.value;
+                            const sign = val > 0 ? '+' : '';
+                            return `${params.name}  ${sign}${val.toFixed(2)} 亿`;
+                        },
+                        fontSize: window.innerWidth < 600 ? 11 : 13,
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        textShadowColor: 'rgba(0,0,0,0.8)',
+                        textShadowBlur: 4,
+                        textBorderWidth: 0
                     },
-                    fontSize: window.innerWidth < 600 ? 12 : 15,
-                    fontWeight: 'bold',
-                    color: '#fff',
-                    textBorderColor: '#000',
-                    textBorderWidth: 2
-                },
-                itemStyle: {
-                    borderRadius: [0, 10, 10, 0],
-                    color: function(params) {
-                        const baseColor = colorMap[params.name] || '#4facfe';
-                        return {
-                            type: 'linear',
-                            x: 0, y: 0, x2: 1, y2: 0,
-                            colorStops: [
-                                { offset: 0, color: 'rgba(255,255,255,0.1)' },
-                                { offset: 1, color: baseColor }
-                            ]
-                        };
-                    },
-                    shadowBlur: 15
+                    itemStyle: {
+                        borderRadius: 4
+                    }
                 }
-            }],
+            ],
             animationDuration: 0,
             animationDurationUpdate: currentIntervalSpeed,
             animationEasing: 'linear',
@@ -240,6 +243,7 @@
         const playBtn = document.getElementById('playBtn');
         const timeDisplay = document.getElementById('timeDisplay');
         const speedSelect = document.getElementById('speedSelect');
+        const bgMusic = document.getElementById('bgMusic');
         
         let playInterval;
         let currentIndex = 0;
@@ -257,21 +261,40 @@
             timeDisplay.innerText = frame.time;
             timeSlider.value = index;
             
+            let totalVal = 0;
             const chartData = nameList.map(name => {
                 const item = frame.data.find(x => x.name === name) || {value: 0};
+                const isPositive = item.value >= 0;
+                totalVal += item.value;
                 return {
                     name: name,
                     value: item.value,
                     itemStyle: {
-                        shadowColor: item.value >= 0 ? 'rgba(255,51,51,0.6)' : 'rgba(0,255,136,0.6)'
+                        color: isPositive ? '#F04864' : '#2ECA8B',
+                        shadowColor: isPositive ? 'rgba(240, 72, 100, 0.4)' : 'rgba(46, 202, 139, 0.4)',
+                        shadowBlur: 10
+                    },
+                    label: {
+                        position: isPositive ? 'right' : 'left'
                     }
                 };
             });
             
+            const totalEl = document.getElementById('totalInflow');
+            if (totalEl) {
+                totalEl.innerText = (totalVal > 0 ? '+' : '') + totalVal.toFixed(2) + ' 亿';
+                totalEl.style.color = totalVal >= 0 ? '#F04864' : '#2ECA8B';
+            }
+            
+            const isLastFrame = index === (window.HISTORY_DATA.length - 1);
+            
             myChart.setOption({
-                series: [{
-                    data: chartData
-                }]
+                series: [
+                    { 
+                        realtimeSort: isLastFrame, // 在最后一帧自动启动排序，红绿分开
+                        data: chartData 
+                    }
+                ]
             });
         }
 
@@ -280,10 +303,12 @@
                 clearInterval(playInterval);
                 playBtn.innerText = '▶ 播放';
                 isPlaying = false;
+                bgMusic.pause(); // 暂停音乐
             } else {
                 if (currentIndex >= totalFrames - 1) currentIndex = 0;
                 playBtn.innerText = '⏸ 暂停';
                 isPlaying = true;
+                bgMusic.play().catch(e => console.log("浏览器自动播放限制或加载失败", e)); // 播放音乐
                 
                 currentIntervalSpeed = parseInt(speedSelect.value);
                 myChart.setOption({ animationDurationUpdate: currentIntervalSpeed });
@@ -322,6 +347,32 @@
         }
         
         window.addEventListener('resize', () => myChart.resize());
+
+        // 初始化日期和指数数据
+        const today = new Date();
+        document.getElementById('dateDisplay').innerText = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+        function fetchIndex() {
+            const script = document.createElement('script');
+            script.src = 'https://hq.sinajs.cn/list=s_sh000001';
+            script.charset = 'GBK';
+            script.onload = () => {
+                if (window.hq_str_s_sh000001) {
+                    const parts = window.hq_str_s_sh000001.split(',');
+                    if (parts.length > 3) {
+                        const current = parseFloat(parts[1]).toFixed(2);
+                        const change = parseFloat(parts[3]);
+                        document.getElementById('shIndexValue').innerText = current;
+                        const changeEl = document.getElementById('shIndexChange');
+                        changeEl.innerText = (change > 0 ? '+' : '') + change.toFixed(2) + '%';
+                        changeEl.style.color = change >= 0 ? '#F04864' : '#2ECA8B';
+                    }
+                }
+            };
+            document.head.appendChild(script);
+        }
+        fetchIndex();
+        setInterval(fetchIndex, 60000); // 每分钟更新一次大盘
     </script>
 </body>
 </html>

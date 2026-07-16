@@ -16,9 +16,9 @@ CONCEPT_MAPPING = {
     "先进封装": "先进封装",
     "算力租赁": "算力租赁",
     "消费电子": "消费电子概念",
-    "车路云": "车联网(车路协同)",
+    "白酒": "白酒",
     "低空经济": "低空经济",
-    "AI大模型": "AIGC概念",
+    "人工智能": "人工智能",
     "半导体设备": "芯片概念",
     "黄金概念": "黄金概念",
     "CRO概念": "CRO概念",
@@ -57,10 +57,9 @@ def fetch_data():
                 "value": 0.0
             })
             
-    # 按资金净流入绝对值从高到低排序，直接截取前 12 名展示，或者全展示
-    # 之前是前10名，鉴于现在有18个概念，我们可以放宽到前 12 名，让竞争更激烈
+    # 按资金净流入绝对值从高到低排序，直接全展示
     concept_results.sort(key=lambda x: x['value'], reverse=True)
-    return concept_results[:12]
+    return concept_results
 
 def update_history():
     history_file = 'concept_history.json'

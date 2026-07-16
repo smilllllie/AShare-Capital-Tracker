@@ -1,4 +1,7 @@
 import os
+import sys
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 import json
 import base64
 import datetime
@@ -12,7 +15,7 @@ PUSHPLUS_TOKEN = os.environ.get('PUSHPLUS_TOKEN', '')
 
 async def capture_final_board():
     html_path = pathlib.Path('index.html').absolute().as_uri()
-    screenshot_path = 'latest_board.png'
+    screenshot_path = 'latest_board.jpg'
     
     print("启动浏览器内核，渲染概念赛跑最终榜单...")
     async with async_playwright() as p:
@@ -34,24 +37,28 @@ async def capture_final_board():
         
         container = await page.query_selector('.container')
         if container:
-            await container.screenshot(path=screenshot_path, type="jpeg", quality=60)
+            await container.screenshot(path=screenshot_path, type="jpeg", quality=40)
         else:
-            await page.screenshot(path=screenshot_path, type="jpeg", quality=60)
+            await page.screenshot(path=screenshot_path, type="jpeg", quality=40)
             
         await browser.close()
         print(f"成功保存最终榜单截图: {screenshot_path}")
         return screenshot_path
 
 def upload_image_to_telegraph(image_path):
-    print("正在上传截图到图床(telegra.ph)...")
+    print("正在上传截图到免费图床...")
     try:
         with open(image_path, 'rb') as f:
-            files = {'file': ('image.jpeg', f, 'image/jpeg')}
-            res = requests.post('https://telegra.ph/upload', files=files, timeout=15)
+            url = 'https://freeimage.host/api/1/upload'
+            data = {'key': '6d207e02198a847aa98d0a2a901485a5', 'action': 'upload'}
+            files = {'source': f}
+            res = requests.post(url, data=data, files=files, timeout=15)
             if res.status_code == 200:
-                url = 'https://telegra.ph' + res.json()[0]['src']
-                print(f"✅ 图床上传成功: {url}")
-                return url
+                img_url = res.json()['image']['url']
+                print(f"✅ 图床上传成功: {img_url}")
+                return img_url
+            else:
+                print(f"❌ 图床上传失败，状态码: {res.status_code}, 内容: {res.text}")
     except Exception as e:
         print("❌ 图床上传失败:", e)
     return None
@@ -115,7 +122,7 @@ def push_to_wechat(screenshot_path):
     
     print("正在推送到微信...")
     try:
-        resp = requests.post(url, json=data, timeout=10)
+        resp = requests.post(url, json=data, timeout=20)
         res_json = resp.json()
         if res_json.get("code") == 200:
             print("✅ 微信推送成功！")

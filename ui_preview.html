@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信推送预览</title>
+    <style>
+        /* 模拟手机微信浏览器的暗黑底色 */
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 模拟手机屏幕宽度 */
+        .mobile-container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* 大标题 */
+        .main-header {
+            font-size: 22px;
+            font-weight: bold;
+            color: #FFFFFF;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 12px;
+        }
+
+        /* 新闻卡片 */
+        .news-card {
+            background-color: #1e1e24;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 顶部胶囊标签区 */
+        .badge-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-bullish {
+            background-color: #ff4d4f;
+            color: #fff;
+        }
+
+        /* 利好 */
+        .badge-bearish {
+            background-color: #52c41a;
+            color: #fff;
+        }
+
+        /* 利空 */
+        .badge-neutral {
+            background-color: #595959;
+            color: #fff;
+        }
+
+        /* 中性 */
+
+        .badge-stars {
+            background-color: #2b2b36;
+            color: #ffd700;
+            border: 1px solid #444;
+        }
+
+        .badge-category {
+            background-color: #2b2b36;
+            color: #177ddc;
+            border: 1px solid #444;
+        }
+
+        /* 摘要大标题 */
+        .news-title {
+            font-size: 19px;
+            font-weight: bold;
+            color: #FFFFFF;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        /* 关联标的 */
+        .news-targets {
+            font-size: 15px;
+            color: #ffa940;
+            /* 橙色高亮 */
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+
+        /* 深度分析色块 */
+        .analysis-box {
+            background-color: #232a35;
+            /* 略带蓝色的深灰 */
+            border-left: 4px solid #177ddc;
+            /* 蓝色左边框装饰 */
+            border-radius: 0 8px 8px 0;
+            padding: 16px;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: #d0d0d0;
+        }
+
+        /* 原文灰字 */
+        .original-text {
+            font-size: 13px;
+            color: #7a828e;
+            line-height: 1.5;
+            background-color: #17171a;
+            padding: 12px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-container">
+        <!-- 页面主标题 -->
+        <div class="main-header">
+            ⚡ 盘中突发重磅预警 (14:30)
+        </div>
+
+        <!-- 卡片 1：利好案例 -->
+        <div class="news-card">
+            <div class="badge-container">
+                <span class="badge badge-bullish">利好</span>
+                <span class="badge badge-stars">⭐⭐⭐⭐⭐</span>
+                <span class="badge badge-category">产业链异动</span>
+            </div>
+
+            <div class="news-title">
+                苹果突发削单澄清，果链迎业绩拐点大反转
+            </div>
+
+            <div class="news-targets">
+                关联：立讯精密、歌尔股份
+            </div>
+
+            <div class="analysis-box">
+                <strong>深度分析：</strong> 市场前期悲观预期已被完全计价，此次澄清将直接引发空头平仓与估值修复。果链龙头企业下半年的订单能见度显著提升，属于极其罕见的“预期差”反转。
+            </div>
+
+            <div class="original-text">
+                <strong>原始资讯：</strong> 知名分析师郭明錤最新发文澄清，此前传闻的iPhone 16砍单纯属无稽之谈。供应链数据显示，苹果不仅没有砍单，反而向核心组装厂追加了 5%
+                的产能储备，以应对AI功能的火爆需求。
+            </div>
+        </div>
+
+        <!-- 卡片 2：利空案例 -->
+        <div class="news-card">
+            <div class="badge-container">
+                <span class="badge badge-bearish">利空</span>
+                <span class="badge badge-stars">⭐⭐⭐⭐</span>
+                <span class="badge badge-category">财报业绩</span>
+            </div>
+
+            <div class="news-title">
+                某头部算力厂商 Q2 净利大幅不及预期，毛利率暴跌
+            </div>
+
+            <div class="news-targets">
+                关联标的：中际旭创、工业富联 (情绪拖累)
+            </div>
+
+            <div class="analysis-box">
+                <strong>深度分析：</strong> 铜缆和光模块的竞争极度内卷导致价格战提前到来。虽然营收在涨，但利润率被疯狂挤压，可能引发整个算力板块的估值杀逻辑，建议短期规避。
+            </div>
+
+            <div class="original-text">
+                <strong>原始资讯：</strong> 盘后公告显示，该算力龙头二季度归母净利润同比下降 15%，核心产品毛利率从 35% 骤降至 22%，远低于市场投行给出的 30% 一致预期。
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热点资金榜</title>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(20, 20, 25, 0.8);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid;
+        }
+        .title-outflow { border-color: #00ff88; color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.4); }
+        .title-inflow { border-color: #ff3333; color: #ff3333; text-shadow: 0 0 8px rgba(255,51,51,0.4); }
+        
+        .list-container { margin-bottom: 30px; }
+        
+        .item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .item-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+            z-index: 2;
+        }
+        .rank-outflow { background: #00ff88; color: #000; box-shadow: 0 0 8px #00ff88; }
+        .rank-inflow { background: #ff3333; color: #fff; box-shadow: 0 0 8px #ff3333; }
+        
+        .item-name {
+            width: 80px;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 2;
+        }
+        .item-bar-bg {
+            flex: 1;
+            height: 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin: 0 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .item-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 8px;
+            transition: width 1.2s cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+        .fill-outflow { background: linear-gradient(90deg, transparent, #00ff88); box-shadow: 0 0 10px rgba(0,255,136,0.6); }
+        .fill-inflow { background: linear-gradient(90deg, transparent, #ff3333); box-shadow: 0 0 10px rgba(255,51,51,0.6); }
+        
+        .item-value {
+            width: 70px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .val-outflow { color: #00ff88; }
+        .val-inflow { color: #ff3333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div><span id="dateStr" style="font-size: 18px; font-weight: bold;">--月--日</span> <span style="background: #ff3333; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left:5px;">收盘</span></div>
+            <h1>热点资金榜</h1>
+            <div style="text-align: right;">
+                <div style="font-size: 10px; color: #888;">上证指数</div>
+                <div id="indexVal" style="font-size: 16px; font-weight: bold;">----.--</div>
+            </div>
+        </div>
+        
+        <div class="list-container">
+            <div class="section-title title-outflow">净流出</div>
+            <div id="outflow-list"></div>
+        </div>
+        
+        <div class="list-container">
+            <div class="section-title title-inflow">净流入</div>
+            <div id="inflow-list"></div>
+        </div>
+    </div>
+    
+    <script>
+        window.CAPITAL_DATA = {
+            date: '07月14日',
+            index: '2900.00',
+            inflow: [
+                { rank: 1, name: '商业航天', value: 73.6, text: '+73.6亿' },
+                { rank: 2, name: '军工', value: 62.3, text: '+62.3亿' }
+            ],
+            outflow: [
+                { rank: 1, name: '半导体', value: 165.2, text: '-165.2亿' },
+                { rank: 2, name: '国产芯片', value: 146.8, text: '-146.8亿' }
+            ]
+        };
+
+        function renderBoard() {
+            const data = window.CAPITAL_DATA || { inflow: [], outflow: [] };
+            
+            document.getElementById('dateStr').textContent = data.date || '未知日期';
+            document.getElementById('indexVal').textContent = data.index || '----.--';
+            
+            let maxVal = 0;
+            [...(data.inflow || []), ...(data.outflow || [])].forEach(item => {
+                if (item.value > maxVal) maxVal = item.value;
+            });
+            if (maxVal === 0) maxVal = 1;
+
+            const renderList = (listId, items, type) => {
+                const container = document.getElementById(listId);
+                container.innerHTML = '';
+                
+                (items || []).forEach((item) => {
+                    const widthPercent = (item.value / maxVal) * 100;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    div.innerHTML = `
+                        <div class="item-rank rank-${type}">${item.rank}</div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-bar-bg">
+                            <div class="item-bar-fill fill-${type}" style="width: 0%;" data-target="${widthPercent}%"></div>
+                        </div>
+                        <div class="item-value val-${type}">${item.text}</div>
+                    `;
+                    container.appendChild(div);
+                });
+            };
+
+            renderList('outflow-list', data.outflow, 'outflow');
+            renderList('inflow-list', data.inflow, 'inflow');
+
+            setTimeout(() => {
+                document.querySelectorAll('.item-bar-fill').forEach(bar => {
+                    bar.style.width = bar.getAttribute('data-target');
+                });
+            }, 100);
+        }
+        
+        window.onload = renderBoard;
+    </script>
+</body>
+</html>
